@@ -89,29 +89,39 @@
 
             <div class="history-section">
                 <h2><i class="fas fa-history"></i> История измерений</h2>
-                <button class="test-btn" id="refreshHistory">
-                    <i class="fas fa-sync-alt"></i> Обновить историю
-                </button>
 
-                <div class="chart-container">
-                    <canvas id="speedChart"></canvas>
-                </div>
+                {% if user.is_authenticated %}
+                    <button class="test-btn" id="refreshHistory">
+                        <i class="fas fa-sync-alt"></i> Обновить историю
+                    </button>
 
-                <div class="table-container">
-                    <table class="history-table" id="historyTable">
-                        <thead>
-                            <tr>
-                                <th>Дата</th>
-                                <th>Ping (мс)</th>
-                                <th>Download (Мбит/с)</th>
-                                <th>Upload (Мбит/с)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- История будет загружена здесь -->
-                        </tbody>
-                    </table>
-                </div>
+                    <div class="chart-container">
+                        <canvas id="speedChart"></canvas>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="history-table" id="historyTable">
+                            <thead>
+                                <tr>
+                                    <th>Дата</th>
+                                    <th>Ping (мс)</th>
+                                    <th>Download (Мбит/с)</th>
+                                    <th>Upload (Мбит/с)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- История будет загружена здесь -->
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="status-message status-info">
+                        <i class="fas fa-info-circle"></i>
+                        Для просмотра истории измерений
+                        <a href="{% url 'login' %}">войдите</a> или
+                        <a href="{% url 'register' %}">зарегистрируйтесь</a>
+                    </div>
+                {% endif %}
             </div>
         </div>
 

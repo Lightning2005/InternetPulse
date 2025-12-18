@@ -81,25 +81,34 @@ def save_result(request):
             data = json.loads(request.body.decode('utf-8'))
 
             # Проверяем и ограничиваем значения
-            ping = max(0, min(float(data.get('ping', 0)), 1000))  # 0-1000 мс
-            download = max(0, min(float(data.get('download', 0)), 2000))  # 0-2000 Мбит/с
-            upload = max(0, min(float(data.get('upload', 0)), 2000))  # 0-2000 Мбит/с
+            ping = max(0, min(float(data.get('ping', 0)), 1000))
+            download = max(0, min(float(data.get('download', 0)), 2000))
+            upload = max(0, min(float(data.get('upload', 0)), 2000))
 
-            result = SpeedTestResult(
-                user=request.user if request.user.is_authenticated else None,
-                ip_address=request.META.get('REMOTE_ADDR'),
-                ping=ping,
-                download=download,
-                upload=upload,
-                server=data.get('server', 'local')
-            )
-            result.save()
+            # СОХРАНЯЕМ ТОЛЬКО ДЛЯ АВТОРИЗОВАННЫХ
+            result = None
+            if request.user.is_authenticated:
+                result = SpeedTestResult(
+                    user=request.user,
+                    ip_address=request.META.get('REMOTE_ADDR'),
+                    ping=ping,
+                    download=download,
+                    upload=upload,
+                    server=data.get('server', 'local')
+                )
+                result.save()
 
-            return JsonResponse({
-                'status': 'success',
-                'id': result.id,
-                'timestamp': result.timestamp.isoformat()
-            })
+                return JsonResponse({
+                    'status': 'success',
+                    'id': result.id,
+                    'timestamp': result.timestamp.isoformat()
+                })
+            else:
+                # Для неавторизованных просто возвращаем успех БЕЗ сохранения
+                return JsonResponse({
+                    'status': 'success',
+                    'message': 'Результаты не сохранены (требуется авторизация)'
+                })
 
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
@@ -110,7 +119,13 @@ def save_result(request):
 def get_history(request):
     """Получение истории тестов"""
     limit = int(request.GET.get('limit', 10))
-    results = SpeedTestResult.objects.all().order_by('-timestamp')[:limit]
+
+    # Берем результаты ТОЛЬКО для авторизованного пользователя
+    if request.user.is_authenticated:
+        results = SpeedTestResult.objects.filter(user=request.user).order_by('-timestamp')[:limit]
+    else:
+        # Для неавторизованных - пустой список
+        results = []
 
     history = []
     for result in results:

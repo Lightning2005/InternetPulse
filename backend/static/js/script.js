@@ -1,8 +1,7 @@
-// Класс для управления тестом скорости
 class SpeedTest {
     constructor() {
         this.testBtn = document.getElementById('startTest');
-        this.refreshBtn = document.getElementById('refreshHistory');
+        this.refreshBtn = document.getElementById('refreshHistory'); // Может быть null для неавторизованных
         this.progressFill = document.getElementById('progressFill');
         this.progressText = document.getElementById('progressText');
         this.statusMessage = document.getElementById('statusMessage');
@@ -22,10 +21,13 @@ class SpeedTest {
 
     init() {
         this.testBtn.addEventListener('click', () => this.runTest());
-        this.refreshBtn.addEventListener('click', () => this.loadHistory());
 
-        // Загружаем историю при старте
-        this.loadHistory();
+        // Проверяем, есть ли кнопка обновления истории (есть только у авторизованных)
+        if (this.refreshBtn) {
+            this.refreshBtn.addEventListener('click', () => this.loadHistory());
+            // Загружаем историю при старте только для авторизованных
+            this.loadHistory();
+        }
 
         // Добавляем анимацию при загрузке
         this.animateCards();
@@ -195,6 +197,11 @@ class SpeedTest {
     }
 
     async loadHistory() {
+        // Проверяем, есть ли кнопка обновления (она есть только у авторизованных)
+        if (!this.refreshBtn) {
+            return; // Неавторизованный пользователь - выходим
+        }
+
         try {
             this.refreshBtn.disabled = true;
             this.refreshBtn.innerHTML = '<span class="loading"></span> Загрузка...';
