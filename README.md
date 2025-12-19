@@ -32,3 +32,7 @@ backend/
 python manage.py migrate
 
 python manage.py runserver
+
+## Ссылка на сайт
+
+https://mcqueen322.pythonanywhere.com
